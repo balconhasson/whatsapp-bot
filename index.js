@@ -2,9 +2,14 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const QRCode = require('qrcode');
 const fs = require('fs');
 const { MessageMedia } = require('whatsapp-web.js');
+const express = require('express');
 
+// אתחול הלקוח עם הגדרות מיוחדות עבור השרת של Render
 const client = new Client({
-    authStrategy: new LocalAuth()
+    authStrategy: new LocalAuth(),
+    puppeteer: {
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    }
 });
 
 // יצירת תמונת QR ברגע שהמערכת מוכנה
@@ -82,6 +87,18 @@ client.on('message', async message => {
             console.error('שגיאה בשליחת תמונה 2:', error);
         }
     }
+});
+
+// שרת אינטרנט בסיסי כדי למנוע מ-Render לקרוס מחוסר האזנה לפורט
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/', (req, res) => {
+    res.send('הבוט של לעוף על המרפסת פעיל באוויר! 🌿');
+});
+
+app.listen(PORT, () => {
+    console.log(`שרת הרשת מאזין לפורט ${PORT}`);
 });
 
 client.initialize();
