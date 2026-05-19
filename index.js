@@ -8,7 +8,7 @@ const express = require('express');
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome',
+        executablePath: './.cache/puppeteer/chrome/linux-127.0.6533.88/chrome-linux/chrome',
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     }
 });
