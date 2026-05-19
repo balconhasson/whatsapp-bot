@@ -1,4 +1,5 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
+const locateChrome = require('locate-chrome');
 const QRCode = require('qrcode');
 const fs = require('fs');
 const { MessageMedia } = require('whatsapp-web.js');
@@ -8,7 +9,7 @@ const express = require('express');
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
-        executablePath: './.cache/puppeteer/chrome/linux-127.0.6533.88/chrome-linux/chrome',
+        executablePath: locateChrome.arg || '/usr/bin/google-chrome',
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     }
 });
