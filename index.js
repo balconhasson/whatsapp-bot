@@ -9,6 +9,7 @@ const express = require('express');
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
+        executablePath: locateChrome(),
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     }
 });
