@@ -1,0 +1,24 @@
+# Chrome (installed via `npx puppeteer browsers install chrome` in the
+# build script) needs these shared libraries at runtime. Railway's default
+# Nixpacks Node image does not include them, which causes Chrome to fail to
+# launch (or crash immediately) even once the executablePath is correct.
+[phases.setup]
+aptPkgs = [
+  "libnss3",
+  "libatk-bridge2.0-0",
+  "libatk1.0-0",
+  "libx11-xcb1",
+  "libxcomposite1",
+  "libxdamage1",
+  "libxrandr2",
+  "libgbm1",
+  "libgtk-3-0",
+  "libasound2",
+  "libxss1",
+  "libxtst6",
+  "libpango-1.0-0",
+  "libcups2",
+  "libdrm2",
+  "fonts-liberation",
+  "ca-certificates"
+]

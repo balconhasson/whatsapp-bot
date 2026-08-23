@@ -1,15 +1,15 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
-const puppeteer = require('puppeteer');
 const QRCode = require('qrcode');
 const fs = require('fs');
 const { MessageMedia } = require('whatsapp-web.js');
 const express = require('express');
 
 // אתחול הלקוח עם הגדרות מיוחדות עבור השרת של Railway
+// לא מגדירים executablePath ידנית - Puppeteer יודע לאתר בעצמו את
+// הדפדפן שהוא הוריד (ראו .puppeteerrc.cjs ואת סקריפט ה-build)
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
-        executablePath: puppeteer.executablePath(),
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
     }
 });
