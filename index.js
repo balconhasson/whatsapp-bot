@@ -1,16 +1,16 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
-const locateChrome = require('locate-chrome');
+const puppeteer = require('puppeteer');
 const QRCode = require('qrcode');
 const fs = require('fs');
 const { MessageMedia } = require('whatsapp-web.js');
 const express = require('express');
 
-// אתחול הלקוח עם הגדרות מיוחדות עבור השרת של Render
+// אתחול הלקוח עם הגדרות מיוחדות עבור השרת של Railway
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
-        executablePath: locateChrome(),
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        executablePath: puppeteer.executablePath(),
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
     }
 });
 
@@ -52,7 +52,7 @@ client.on('message', async message => {
         
         // שליחת תמונה מספר 1 (אווירה) באופן אוטומטי
         try {
-            const media1 = MessageMedia.fromFilePath('./pic1.jpg');
+            const media1 = MessageMedia.fromFilePath('./pic1.png');
             await client.sendMessage(message.from, media1);
             console.log('הבוט ענה על סדנה ושלח את תמונה 1 בהצלחה! 📸');
         } catch (error) {
@@ -82,7 +82,7 @@ client.on('message', async message => {
         
         // שליחת תמונה מספר 2 (תוצרים מהממים) באופן אוטומטי
         try {
-            const media2 = MessageMedia.fromFilePath('./pic2.jpg');
+            const media2 = MessageMedia.fromFilePath('./pic2.png');
             await client.sendMessage(message.from, media2);
             console.log('הבוט ענה על אירוע ושלח את תמונה 2 בהצלחה! 📸');
         } catch (error) {
