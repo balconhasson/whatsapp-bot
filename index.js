@@ -1,15 +1,52 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
-const QRCode = require('qrcode');
+// --- חייב לרוץ לפני כל require של puppeteer/whatsapp-web.js! ---
+// Puppeteer קורא את PUPPETEER_EXECUTABLE_PATH פעם אחת בלבד, ברגע ה-require,
+// ושומר את זה בזיכרון פנימי לכל שאר חיי התהליך. אם המשתנה הזה מוגדר ב-Railway
+// לערך שגוי (למשל משאריות ניסיון תיקון קודם), שום שינוי קוד אחרי ה-require
+// לא יעזור - הערך הפגום כבר "נאפה" פנימית. חובה לנקות אותו כאן, לפני השורה
+// הבאה, לפני שהוא נטען כלל (require('whatsapp-web.js') בעצמו כבר עושה
+// require('puppeteer') פנימית).
 const fs = require('fs');
+{
+    const envPath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    if (envPath !== undefined) {
+        console.log(`PUPPETEER_EXECUTABLE_PATH is set. type=${typeof envPath} value=${JSON.stringify(envPath)}`);
+        if (typeof envPath === 'string' && envPath.length > 0 && fs.existsSync(envPath)) {
+            console.log(`✅ Using browser from PUPPETEER_EXECUTABLE_PATH: ${envPath}`);
+        } else {
+            console.error(`⚠️ PUPPETEER_EXECUTABLE_PATH is set but invalid (not a real, existing file path) - ignoring it. Please remove this variable from Railway's environment settings, it should not be needed.`);
+            delete process.env.PUPPETEER_EXECUTABLE_PATH;
+        }
+    }
+}
+
+const { Client, LocalAuth } = require('whatsapp-web.js');
+const puppeteer = require('puppeteer');
+const QRCode = require('qrcode');
 const { MessageMedia } = require('whatsapp-web.js');
 const express = require('express');
 
+// נתיב הדפדפן נקבע כאן במפורש, עם בדיקת תקינות ולוג ברור - כדי שאם משהו
+// עדיין ישתבש, נראה בדיוק איזה ערך ומאיזה סוג התקבל, במקום שגיאה עמומה.
+function resolveChromeExecutablePath() {
+    const computed = puppeteer.executablePath();
+    console.log(`Puppeteer computed executablePath: type=${typeof computed} value=${JSON.stringify(computed)}`);
+
+    if (typeof computed !== 'string' || computed.length === 0) {
+        throw new Error(`puppeteer.executablePath() did not return a valid string (got type=${typeof computed}, value=${JSON.stringify(computed)}). Refusing to start with an invalid browser path.`);
+    }
+    if (!fs.existsSync(computed)) {
+        console.error(`⚠️ Computed executablePath does not exist on disk: ${computed}. Make sure the build step (npx puppeteer browsers install chrome) ran successfully and .puppeteerrc.cjs's cacheDirectory matches between build and runtime.`);
+    } else {
+        console.log(`✅ Chrome found at: ${computed}`);
+    }
+    return computed;
+}
+
 // אתחול הלקוח עם הגדרות מיוחדות עבור השרת של Railway
-// לא מגדירים executablePath ידנית - Puppeteer יודע לאתר בעצמו את
-// הדפדפן שהוא הוריד (ראו .puppeteerrc.cjs ואת סקריפט ה-build)
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
+        executablePath: resolveChromeExecutablePath(),
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
     }
 });
