@@ -1,3 +1,16 @@
+// באנר עמיד בפני כל בעיית caching/logging - אם השורה הזו לא מופיעה בלוג
+// הריצה, זו הוכחה חד-משמעית שה-container לא מריץ את הקובץ הזה בכלל.
+process.stdout.write('BOOT-MARKER build-fix-2026-08-24-v2: index.js loaded\n');
+
+// לוכדים כל שגיאה לא-מטופלת עם stack trace מלא, כדי שלא נאבד מידע אם
+// client.initialize() נכשל בצורה לא צפויה.
+process.on('unhandledRejection', (reason) => {
+    console.error('UNHANDLED REJECTION:', reason);
+});
+process.on('uncaughtException', (err) => {
+    console.error('UNCAUGHT EXCEPTION:', err);
+});
+
 // --- חייב לרוץ לפני כל require של puppeteer/whatsapp-web.js! ---
 // Puppeteer קורא את PUPPETEER_EXECUTABLE_PATH פעם אחת בלבד, ברגע ה-require,
 // ושומר את זה בזיכרון פנימי לכל שאר חיי התהליך. אם המשתנה הזה מוגדר ב-Railway
