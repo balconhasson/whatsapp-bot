@@ -35,6 +35,7 @@ const fs = require('fs');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const puppeteer = require('puppeteer');
 const QRCode = require('qrcode');
+const qrcodeTerminal = require('qrcode-terminal');
 const { MessageMedia } = require('whatsapp-web.js');
 const express = require('express');
 
@@ -66,9 +67,14 @@ const client = new Client({
 
 // יצירת תמונת QR ברגע שהמערכת מוכנה
 client.on('qr', async (qr) => {
+    // מדפיסים QR סרוק ישירות ללוגים של Railway - זו הדרך הכי מהירה לסרוק,
+    // בלי תלות בגישה לקובץ על הדיסק של ה-container.
+    console.log('סרקו את קוד ה-QR הבא מתוך הלוגים:');
+    qrcodeTerminal.generate(qr, { small: true });
+
     try {
         await QRCode.toFile('./qr.png', qr);
-        console.log('קובץ תמונה בשם qr.png נוצר בהצלחה!');
+        console.log('קובץ תמונה בשם qr.png נוצר בהצלחה! ניתן גם לצפות בו בכתובת /qr');
     } catch (err) {
         console.error('שגיאה ביצירת קובץ ה-QR:', err);
     }
@@ -147,6 +153,16 @@ const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
     res.send('הבוט של לעוף על המרפסת פעיל באוויר! 🌿');
+});
+
+// מציג את תמונת ה-QR הכי עדכנית לסריקה מהדפדפן, אם קיימת עדיין
+app.get('/qr', (req, res) => {
+    const qrPath = './qr.png';
+    if (!fs.existsSync(qrPath)) {
+        res.status(404).send('עדיין אין קוד QR זמין - יתכן שהבוט כבר מחובר, או שהוא עדיין מאתחל.');
+        return;
+    }
+    res.sendFile(qrPath, { root: __dirname });
 });
 
 app.listen(PORT, () => {
